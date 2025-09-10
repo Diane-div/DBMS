@@ -1,0 +1,103 @@
+mysql> create database library;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> use library;
+Database changed
+mysql> CREATE TABLE Library_Audit (
+    ->     audit_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     book_id INT,
+    ->     title VARCHAR(255),
+    ->     author VARCHAR(255),
+    ->     published_year INT,
+    ->     operation VARCHAR(10),      -- 'UPDATE' or 'DELETE'
+    ->     operation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.23 sec)
+
+mysql> DELIMITER $$
+mysql> 
+mysql> CREATE TRIGGER before_library_update
+    -> BEFORE UPDATE ON Library
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     INSERT INTO Library_Audit (book_id, title, author, published_year, operation)
+    ->     VALUES (OLD.book_id, OLD.title, OLD.author, OLD.published_year, 'UPDATE');
+    -> END$$
+ERROR 1146 (42S02): Table 'library.Library' doesn't exist
+mysql> 
+mysql> DELIMITER ;
+mysql> ^C
+mysql>     book_id INT PRIMARY KEY,
+    ->     title VARCHAR(255),
+    ->     author VARCHAR(255),
+    ->     published_year INT
+    -> );
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'book_id INT PRIMARY KEY,
+    title VARCHAR(255),
+    author VARCHAR(255),
+    pu' at line 1
+mysql> CREATE TABLE Library (
+    ->     book_id INT PRIMARY KEY,
+    ->     title VARCHAR(255),
+    ->     author VARCHAR(255),
+    ->     published_year INT
+    -> );
+Query OK, 0 rows affected (0.21 sec)
+
+mysql> DELIMITER $$
+mysql> 
+mysql> CREATE TRIGGER before_library_update
+    -> BEFORE UPDATE ON Library
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     INSERT INTO Library_Audit (book_id, title, author, published_year, operation)
+    ->     VALUES (OLD.book_id, OLD.title, OLD.author, OLD.published_year, 'UPDATE');
+    -> END$$
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> 
+mysql> DELIMITER ;
+mysql> ----create trigger before delete
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '----create trigger before delete' at line 1
+mysql> DELIMITER $$
+mysql> 
+mysql> CREATE TRIGGER before_library_delete
+    -> BEFORE DELETE ON Library
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     INSERT INTO Library_Audit (book_id, title, author, published_year, operation)
+    ->     VALUES (OLD.book_id, OLD.title, OLD.author, OLD.published_year, 'DELETE');
+    -> END$$
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> 
+mysql> DELIMITER ;
+mysql> INSERT INTO Library (book_id, title, author, published_year) VALUES
+    -> (1, 'The Great Gatsby', 'F. Scott Fitzgerald', 1925),
+    -> (2, '1984', 'George Orwell', 1949),
+    -> (3, 'To Kill a Mockingbird', 'Harper Lee', 1960);
+Query OK, 3 rows affected (0.08 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql> select * from Library_Audit;
+Empty set (0.00 sec)
+
+mysql> update table Library set title= "xyz" where book_id=2;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'table Library set title= "xyz" where book_id=2' at line 1
+mysql> update table Library where book_id=2 set title="diva";
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'table Library where book_id=2 set title="diva"' at line 1
+mysql> UPDATE Library
+    -> SET title = 'Nineteen Eighty-Four', published_year = 1948
+    -> WHERE book_id = 2;
+Query OK, 1 row affected (0.05 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from Library_Audit;
++----------+---------+-------+---------------+----------------+-----------+---------------------+
+| audit_id | book_id | title | author        | published_year | operation | operation_time      |
++----------+---------+-------+---------------+----------------+-----------+---------------------+
+|        1 |       2 | 1984  | George Orwell |           1949 | UPDATE    | 2025-09-10 12:54:49 |
++----------+---------+-------+---------------+----------------+-----------+---------------------+
+1 row in set (0.00 sec)
+
