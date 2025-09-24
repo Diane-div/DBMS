@@ -1,0 +1,206 @@
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| DEMO               |
+| OrderDetails       |
+| STUDENT            |
+| ass1               |
+| assgn1             |
+| assign1            |
+| assign2            |
+| assign3            |
+| assign4            |
+| assign5            |
+| assign6            |
+| assign7            |
+| bank               |
+| circle             |
+| demo               |
+| employeeDb         |
+| liberary           |
+| movie              |
+| mysql              |
+| performance_schema |
+| practical          |
+| student            |
+| studentDb          |
+| student_db         |
+| student_div        |
+| sys                |
+| testt5             |
++--------------------+
+28 rows in set (0.05 sec)
+
+mysql> create database cursor7322;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> use cursor7322;
+Database changed
+mysql> DECLARE
+    ->     -- Cursor with parameter for RollCall_ID
+    ->     CURSOR cur_new_rollcall(p_rollcall_id N_RollCall.RollCall_ID%TYPE) IS
+    ->         SELECT * 
+    ->         FROM N_RollCall 
+    ->         WHERE RollCall_ID = p_rollcall_id;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'DECLARE
+    
+    CURSOR cur_new_rollcall(p_rollcall_id N_RollCall.RollCall_ID%TY' at line 1
+mysql> 
+mysql>     -- Variable to hold values from N_RollCall
+mysql>     v_rollcall_id  N_RollCall.RollCall_ID%TYPE;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'v_rollcall_id  N_RollCall.RollCall_ID%TYPE' at line 1
+mysql>     v_name         N_RollCall.Name%TYPE;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'v_name         N_RollCall.Name%TYPE' at line 1
+mysql>     v_date         N_RollCall.Attendance_Date%TYPE;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'v_date         N_RollCall.Attendance_Date%TYPE' at line 1
+mysql> 
+mysql> BEGIN
+    ->     -- Loop through all records in N_RollCall
+    ->     FOR rec IN (SELECT * FROM N_RollCall) LOOP
+    -> 
+    ->         -- Check if record exists in O_RollCall
+    ->         SELECT COUNT(*) INTO v_rollcall_id
+    ->         FROM O_RollCall
+    ->         WHERE RollCall_ID = rec.RollCall_ID;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOR rec IN (SELECT * FROM N_RollCall) LOOP
+
+        
+        SELECT COUNT(*) INT' at line 3
+mysql> 
+mysql>         IF v_rollcall_id = 0 THEN
+    ->             -- Record does not exist, insert using parameterized cursor
+    ->             FOR c_rec IN cur_new_rollcall(rec.RollCall_ID) LOOP
+    ->                 INSERT INTO O_RollCall (RollCall_ID, Name, Attendance_Date)
+    ->                 VALUES (c_rec.RollCall_ID, c_rec.Name, c_rec.Attendance_Date);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'IF v_rollcall_id = 0 THEN
+            
+            FOR c_rec IN cur_new_rollcall' at line 1
+mysql>             END LOOP;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'END LOOP' at line 1
+mysql>         ELSE
+    ->             -- Record already exists, skip it
+    ->             DBMS_OUTPUT.PUT_LINE('Skipping duplicate RollCall_ID: ' || rec.RollCall_ID);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ELSE
+            
+            DBMS_OUTPUT.PUT_LINE('Skipping duplicate RollCall_' at line 1
+mysql>         END IF;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'END IF' at line 1
+mysql> 
+mysql>     END LOOP;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'END LOOP' at line 1
+mysql>     
+mysql>     COMMIT;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> EXCEPTION
+    ->     WHEN OTHERS THEN
+    ->         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM' at line 1
+mysql>         ROLLBACK;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> END;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'END' at line 1
+mysql> /
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '/' at line 1
+mysql> DElimiter /
+mysql> DECLARE
+    ->     -- Cursor with parameter for RollCall_ID
+    ->     CURSOR cur_new_rollcall(p_rollcall_id N_RollCall.RollCall_ID%TYPE) IS
+    ->         SELECT * 
+    ->         FROM N_RollCall 
+    ->         WHERE RollCall_ID = p_rollcall_id;
+    -> 
+    ->     -- Variable to hold values from N_RollCall
+    ->     v_rollcall_id  N_RollCall.RollCall_ID%TYPE;
+    ->     v_name         N_RollCall.Name%TYPE;
+    ->     v_date         N_RollCall.Attendance_Date%TYPE;
+    -> 
+    -> BEGIN
+    ->     -- Loop through all records in N_RollCall
+    ->     FOR rec IN (SELECT * FROM N_RollCall) LOOP
+    -> 
+    ->         -- Check if record exists in O_RollCall
+    ->         SELECT COUNT(*) INTO v_rollcall_id
+    ->         FROM O_RollCall
+    ->         WHERE RollCall_ID = rec.RollCall_ID;
+    -> 
+    ->         IF v_rollcall_id = 0 THEN
+    ->             -- Record does not exist, insert using parameterized cursor
+    ->             FOR c_rec IN cur_new_rollcall(rec.RollCall_ID) LOOP
+    ->                 INSERT INTO O_RollCall (RollCall_ID, Name, Attendance_Date)
+    ->                 VALUES (c_rec.RollCall_ID, c_rec.Name, c_rec.Attendance_Date);
+    ->             END LOOP;
+    ->         ELSE
+    ->             -- Record already exists, skip it
+    ->             DBMS_OUTPUT.PUT_LINE('Skipping duplicate RollCall_ID: ' || rec.RollCall_ID);
+    ->         END IF;
+    -> 
+    ->     END LOOP;
+    ->     
+    ->     COMMIT;
+    -> EXCEPTION
+    ->     WHEN OTHERS THEN
+    ->         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+    ->         ROLLBACK;
+    -> END;
+    -> /
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'DECLARE
+    
+    CURSOR cur_new_rollcall(p_rollcall_id N_RollCall.RollCall_ID%TY' at line 1
+mysql> DELIMITER //
+mysql> 
+mysql> CREATE PROCEDURE Merge_RollCall()
+    -> BEGIN
+    ->     -- Declare variables
+    ->     DECLARE done INT DEFAULT FALSE;
+    ->     DECLARE v_RollCall_ID INT;
+    ->     DECLARE v_Name VARCHAR(100);
+    ->     DECLARE v_Attendance_Date DATE;
+    -> 
+    ->     -- Declare cursor
+    ->     DECLARE cur CURSOR FOR
+    ->         SELECT RollCall_ID, Name, Attendance_Date FROM N_RollCall;
+    -> 
+    ->     -- Declare continue handler for end of cursor
+    ->     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    -> 
+    ->     -- Open cursor
+    ->     OPEN cur;
+    -> 
+    ->     read_loop: LOOP
+    ->         FETCH cur INTO v_RollCall_ID, v_Name, v_Attendance_Date;
+    ->         IF done THEN
+    ->             LEAVE read_loop;
+    ->         END IF;
+    -> 
+    ->         -- Check if the record already exists
+    ->         IF NOT EXISTS (
+    ->             SELECT 1 FROM O_RollCall WHERE RollCall_ID = v_RollCall_ID
+    ->         ) THEN
+    ->             -- Insert if it doesn't exist
+    ->             INSERT INTO O_RollCall (RollCall_ID, Name, Attendance_Date)
+    ->             VALUES (v_RollCall_ID, v_Name, v_Attendance_Date);
+    ->         END IF;
+    ->     END LOOP;
+    -> 
+    ->     -- Close cursor
+    ->     CLOSE cur;
+    -> END;
+    -> //
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> 
+mysql> DELIMITER ;
+mysql> CALL Merge_RollCall();
+ERROR 1146 (42S02): Table 'cursor7322.N_RollCall' doesn't exist
+mysql> ^C
+mysql> DROP PROCEDURE IF EXISTS Merge_RollCall;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> tee assign6.txt;
