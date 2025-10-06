@@ -1,0 +1,106 @@
+> use myShopDB
+switched to db myShopDB
+> db.users.insertMany([
+...   {
+...     name: "Alice",
+...     age: 30,
+...     city: "New York",
+...     purchases: [
+...       { item: "apple", price: 5, quantity: 3 },
+...       { item: "banana", price: 2, quantity: 10 }
+...     ]
+...   },
+...   {
+...     name: "Bob",
+...     age: 25,
+...     city: "Boston",
+...     purchases: [
+...       { item: "apple", price: 5, quantity: 1 },
+...       { item: "orange", price: 3, quantity: 7 }
+...     ]
+...   },
+...   {
+...     name: "Carol",
+...     age: 35,
+...     city: "Chicago",
+...     purchases: [
+...       { item: "banana", price: 2, quantity: 5 },
+...       { item: "orange", price: 3, quantity: 2 }
+...     ]
+...   }
+... ])
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("68e346b3e7eb6d063aeef75c"),
+		ObjectId("68e346b3e7eb6d063aeef75d"),
+		ObjectId("68e346b3e7eb6d063aeef75e")
+	]
+}
+> db.users.createIndex({ city: 1, age: 1 })
+{
+	"createdCollectionAutomatically" : false,
+	"numIndexesBefore" : 1,
+	"numIndexesAfter" : 2,
+	"ok" : 1
+}
+> db.users.getIndexes()
+[
+	{
+		"v" : 2,
+		"key" : {
+			"_id" : 1
+		},
+		"name" : "_id_",
+		"ns" : "myShopDB.users"
+	},
+	{
+		"v" : 2,
+		"key" : {
+			"city" : 1,
+			"age" : 1
+		},
+		"name" : "city_1_age_1",
+		"ns" : "myShopDB.users"
+	}
+]
+> db.users.find({ city: "New York", age: { $gt: 25 } })
+{ "_id" : ObjectId("68e346b3e7eb6d063aeef75c"), "name" : "Alice", "age" : 30, "city" : "New York", "purchases" : [ { "item" : "apple", "price" : 5, "quantity" : 3 }, { "item" : "banana", "price" : 2, "quantity" : 10 } ] }
+> db.users.aggregate([
+...   // Deconstruct the purchases array
+...   { $unwind: "$purchases" },
+...   
+...   // Calculate total price per purchase
+...   {
+...     $project: {
+...       name: 1,
+...       totalPurchase: { $multiply: ["$purchases.price", "$purchases.quantity"] }
+...     }
+...   },
+... 
+...   // Group by user name and sum all purchases
+...   {
+...     $group: {
+...       _id: "$name",
+...       totalAmountSpent: { $sum: "$totalPurchase" }
+...     }
+...   },
+... 
+...   // Sort descending by total spent
+...   {
+...     $sort: { totalAmountSpent: -1 }
+...   }
+... ])
+{ "_id" : "Alice", "totalAmountSpent" : 35 }
+{ "_id" : "Bob", "totalAmountSpent" : 26 }
+{ "_id" : "Carol", "totalAmountSpent" : 16 }
+> db.users.createIndex({ name: "text" })
+{
+	"createdCollectionAutomatically" : false,
+	"numIndexesBefore" : 2,
+	"numIndexesAfter" : 3,
+	"ok" : 1
+}
+> db.users.find({ $text: { $search: "Alice" } })
+{ "_id" : ObjectId("68e346b3e7eb6d063aeef75c"), "name" : "Alice", "age" : 30, "city" : "New York", "purchases" : [ { "item" : "apple", "price" : 5, "quantity" : 3 }, { "item" : "banana", "price" : 2, "quantity" : 10 } ] }
+> 

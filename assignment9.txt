@@ -1,0 +1,86 @@
+> use testdb
+switched to db testdb
+> db.users.insertOne({ name: "Alice", age: 25, city: "New York" })
+{
+	"acknowledged" : true,
+	"insertedId" : ObjectId("68e3405fdd1a78ad5b68a532")
+}
+> db.users.insertMany([
+...   { name: "Bob", age: 30, city: "Chicago" },
+...   { name: "Charlie", age: 28, city: "San Francisco" }
+... ])
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("68e3406cdd1a78ad5b68a533"),
+		ObjectId("68e3406cdd1a78ad5b68a534")
+	]
+}
+> db.users.find()
+{ "_id" : ObjectId("68e3405fdd1a78ad5b68a532"), "name" : "Alice", "age" : 25, "city" : "New York" }
+{ "_id" : ObjectId("68e3406cdd1a78ad5b68a533"), "name" : "Bob", "age" : 30, "city" : "Chicago" }
+{ "_id" : ObjectId("68e3406cdd1a78ad5b68a534"), "name" : "Charlie", "age" : 28, "city" : "San Francisco" }
+> db.users.find({ age: { $gt: 25 } })
+{ "_id" : ObjectId("68e3406cdd1a78ad5b68a533"), "name" : "Bob", "age" : 30, "city" : "Chicago" }
+{ "_id" : ObjectId("68e3406cdd1a78ad5b68a534"), "name" : "Charlie", "age" : 28, "city" : "San Francisco" }
+> db.users.find({ city: { $in: ["New York", "Chicago"] } })
+{ "_id" : ObjectId("68e3405fdd1a78ad5b68a532"), "name" : "Alice", "age" : 25, "city" : "New York" }
+{ "_id" : ObjectId("68e3406cdd1a78ad5b68a533"), "name" : "Bob", "age" : 30, "city" : "Chicago" }
+> db.users.updateOne(
+...   { name: "Alice" },
+...   { $set: { city: "Boston" } }
+... )
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+> db.users.updateMany(
+...   { age: { $gt: 25 } },
+...   { $inc: { age: 1 } }
+... )
+{ "acknowledged" : true, "matchedCount" : 2, "modifiedCount" : 2 }
+> db.users.deleteOne({ name: "Bob" })
+{ "acknowledged" : true, "deletedCount" : 1 }
+> db.users.deleteMany({ age: { $lt: 27 } })
+{ "acknowledged" : true, "deletedCount" : 1 }
+> db.users.find({
+...   $and: [
+...     { city: "New York" },
+...     { age: { $gt: 20 } }
+...   ]
+... })
+> db.users.find({
+...   $or: [
+...     { city: "Boston" },
+...     { city: "Chicago" }
+...   ]
+... })
+> db.users.distinct("city")
+[ "San Francisco", "New York", "Boston", "Chicago" ]
+> db.users.find({ city: "New York" })
+{ "_id" : ObjectId("68e343bb0e6a52e5ed8c379a"), "name" : "Alice", "age" : 28, "city" : "New York" }
+> db.users.find({ $or: [ { city: "Boston" }, { city: "Chicago" } ] })
+{ "_id" : ObjectId("68e343bb0e6a52e5ed8c379b"), "name" : "Bob", "age" : 35, "city" : "Boston" }
+{ "_id" : ObjectId("68e343bb0e6a52e5ed8c379c"), "name" : "Carol", "age" : 22, "city" : "Chicago" }
+> db.users.insertMany([
+...   { name: "Alice", age: 28, city: "New York" },
+...   { name: "Bob", age: 35, city: "Boston" },
+...   { name: "Carol", age: 22, city: "Chicago" }
+... use testdb
+... ])
+2025-10-06T09:53:58.584+0530 E QUERY    [thread1] SyntaxError: missing ] after element list @(shell):5:0
+> db.users.insertMany([   { name: "Avi", age: 20, city: "New York" },   { name: "Bob", age: 35, city: "Boston" },   { name: "Carol", age: 22, city: "Chicago" }])
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("68e3449a0e6a52e5ed8c379d"),
+		ObjectId("68e3449a0e6a52e5ed8c379e"),
+		ObjectId("68e3449a0e6a52e5ed8c379f")
+	]
+}
+> db.users.find({ $and: [ { city: "New York" }, { age: { $gt: 20 } }] })
+{ "_id" : ObjectId("68e343bb0e6a52e5ed8c379a"), "name" : "Alice", "age" : 28, "city" : "New York" }
+> db.users.find({$or:[{city:"Boston"},{city:"Chicago"}]})
+{ "_id" : ObjectId("68e343bb0e6a52e5ed8c379b"), "name" : "Bob", "age" : 35, "city" : "Boston" }
+{ "_id" : ObjectId("68e343bb0e6a52e5ed8c379c"), "name" : "Carol", "age" : 22, "city" : "Chicago" }
+{ "_id" : ObjectId("68e3449a0e6a52e5ed8c379e"), "name" : "Bob", "age" : 35, "city" : "Boston" }
+{ "_id" : ObjectId("68e3449a0e6a52e5ed8c379f"), "name" : "Carol", "age" : 22, "city" : "Chicago" }
+> 
+
