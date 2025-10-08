@@ -1,0 +1,54 @@
+> use divdb
+switched to db mydb
+> db.articles.insertMany([
+...   {
+...     _id: 1,
+...     title: "MongoDB MapReduce Example",
+...     content: "MapReduce is a powerful tool in MongoDB"
+...   },
+...   {
+...     _id: 2,
+...     title: "Introduction to MapReduce",
+...     content: "MapReduce processes large data"
+...   }
+... ]);
+{ "acknowledged" : true, "insertedIds" : [ 1, 2 ] }
+> var mapFunction = function() {
+...   var words = this.content.split(" ");
+...   words.forEach(function(word) {
+...     emit(word.toLowerCase(), 1);
+...   });
+... };
+> var reduceFunction = function(key, values) {
+...   return Array.sum(values);
+... };
+> db.articles.mapReduce(
+...   mapFunction,
+...   reduceFunction,
+...   {
+...     out: "word_counts"
+...   }
+... );
+{
+	"result" : "word_counts",
+	"timeMillis" : 481,
+	"counts" : {
+		"input" : 2,
+		"emit" : 11,
+		"reduce" : 1,
+		"output" : 10
+	},
+	"ok" : 1
+}
+> db.word_counts.find().pretty();
+{ "_id" : "a", "value" : 1 }
+{ "_id" : "data", "value" : 1 }
+{ "_id" : "in", "value" : 1 }
+{ "_id" : "is", "value" : 1 }
+{ "_id" : "large", "value" : 1 }
+{ "_id" : "mapreduce", "value" : 2 }
+{ "_id" : "mongodb", "value" : 1 }
+{ "_id" : "powerful", "value" : 1 }
+{ "_id" : "processes", "value" : 1 }
+{ "_id" : "tool", "value" : 1 }
+> 
