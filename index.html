@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MongoDB Frontend</title>
+</head>
+<body>
+    <h2>Add Document</h2>
+    <input type="text" id="name" placeholder="Name">
+    <button onclick="addDocument()">Add</button>
+
+    <h2>All Documents</h2>
+    <ul id="docList"></ul>
+
+    <script>
+        async function fetchDocuments() {
+            const res = await fetch('http://localhost:5000/get');
+            const data = await res.json();
+            const list = document.getElementById('docList');
+            list.innerHTML = '';
+            data.forEach(doc => {
+                const item = document.createElement('li');
+                item.innerHTML = `
+                    ${doc.name}
+                    <button onclick="deleteDocument('${doc._id}')">Delete</button>
+                    <button onclick="editDocument('${doc._id}')">Edit</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        async function addDocument() {
+            const name = document.getElementById('name').value;
+            await fetch('http://localhost:5000/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name })
+            });
+            fetchDocuments();
+        }
+
+        async function deleteDocument(id) {
+            await fetch(`http://localhost:5000/delete/${id}`, {
+                method: 'DELETE'
+            });
+            fetchDocuments();
+        }
+
+        async function editDocument(id) {
+            const newName = prompt("Enter new name:");
+            if (newName) {
+                await fetch(`http://localhost:5000/edit/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: newName })
+                });
+                fetchDocuments();
+            }
+        }
+
+        fetchDocuments(); // Load on start
+    </script>
+</body>
+</html>
